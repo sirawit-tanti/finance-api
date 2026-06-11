@@ -109,4 +109,56 @@ class TransactionController extends Controller
             'message' => 'Delete Success',
         ]);
     }
+
+    public function export(Request $request)
+    {
+        $transactions = Transaction::ownedBy(
+            $request->user()->id
+        )->get();
+
+        $fileName = 'transaction.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' =>
+                "attachment; filename={$fileName}",
+        ];
+
+        $callback = function () use ($transactions) {
+            $file = fopen(
+                'php://output',
+                'w'
+            );
+
+            fputcsv(
+                $file,
+                [
+                    'Title',
+                    'Amount',
+                    'Type',
+                    'Created At'
+                ]
+            );
+
+            foreach ($transactions as $transaction) {
+                fputcsv(
+                    $file,
+                    [
+                        $transaction->title,
+                        $transaction->amount,
+                        $transaction->type,
+                        $transaction->created_at,
+                    ]
+                );
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream(
+            $callback,
+            200,
+            $headers
+        );
+    }
 }

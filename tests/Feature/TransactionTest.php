@@ -439,4 +439,26 @@ class TransactionTest extends TestCase
             'message' => 'Logout Success'
         ]);
     }
+
+    public function test_can_export_transactions_csv(): void
+    {
+        Transaction::create([
+            'user_id' => $this->user->id,
+            'title' => 'Salary',
+            'amount' => 30000,
+            'type' => 'income',
+            'category_id' => $this->category->id
+        ]);
+
+        $response = $this->get(
+            '/api/transaction/export'
+        );
+
+        $response->assertOk();
+
+        $response->assertHeader(
+            'Content-Type',
+            'text/csv; charset=UTF-8'
+        );
+    }
 }

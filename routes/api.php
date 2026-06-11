@@ -13,14 +13,16 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::get('/transaction', [TransactionController::class, 'index']);
     Route::post('/transaction', [TransactionController::class, 'store']);
-    Route::get('/transaction/{id}', [TransactionController::class, 'show']);
-    Route::put('/transaction/{id}', [TransactionController::class, 'update']);
-    Route::delete('/transaction/{id}', [TransactionController::class, 'destroy']);
+    Route::get('/transaction/export', [TransactionController::class, 'export']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/dashboard/monthly', [DashboardController::class, 'monthly']);
     Route::get('/dashboard/category', [DashboardController::class, 'category']);
     Route::get('/categories', [CategoriesController::class, 'index']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    
+    Route::get('/transaction/{id}', [TransactionController::class, 'show']);
+    Route::put('/transaction/{id}', [TransactionController::class, 'update']);
+    Route::delete('/transaction/{id}', [TransactionController::class, 'destroy']);
 });
 
 Route::post('/register', [AuthController::class, 'register']);
