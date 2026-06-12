@@ -461,4 +461,75 @@ class TransactionTest extends TestCase
             'text/csv; charset=UTF-8'
         );
     }
+
+    public function test_can_bulk_create_transactions(): void
+    {
+        $response = $this->postJson(
+            '/api/transaction/bulk',
+            [
+                [
+                    'title' => 'Salary',
+                    'amount' => 30000,
+                    'type' => 'income',
+                    'category_id' => $this->category->id
+                ],
+                [
+                    'title' => 'KFC',
+                    'amount' => 120,
+                    'type' => 'expense',
+                    'category_id' => $this->category->id
+                ]
+            ]
+        );
+
+        $response->assertCreated();
+
+        $response->assertJson([
+            'message' => 'Bulk Create Success',
+            'count' => 2
+        ]);
+
+        $this->assertDatabaseHas('transactions', [
+            'title' => 'Salary',
+            'amount' => 30000,
+            'type' => 'income',
+            'user_id' => $this->user->id
+        ]);
+
+        $this->assertDatabaseHas('transactions', [
+            'title' => 'KFC',
+            'amount' => 120,
+            'type' => 'expense',
+            'user_id' => $this->user->id
+        ]);
+    }
+
+    public function test_bulk_create_requires_valid_items(): void
+    {
+        $response = $this->postJson(
+            '/api/transaction/bulk',
+            [
+                [
+                    'title' => 'Salary',
+                    'amount' => 30000,
+                    'type' => 'income',
+                    'category_id' => $this->category->id
+                ],
+                [
+                    'title' => '',
+                    'amount' => 120,
+                    'type' => 'wrong-type',
+                    'category_id' => 999
+                ]
+            ]
+        );
+
+        $response->assertStatus(422);
+
+        $response->assertJsonValidationErrors([
+            '1.title',
+            '1.type',
+            '1.category_id'
+        ]);
+    }
 }

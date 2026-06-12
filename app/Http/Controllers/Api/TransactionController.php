@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\TransactionResource;
 use App\Http\Requests\TransactionRequest;
 use App\Models\Transaction;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
@@ -61,13 +63,28 @@ class TransactionController extends Controller
 
     public function store(TransactionRequest $request)
     {
-        return Transaction::create([
+        $transaction = Transaction::create([
             'user_id' => $request->user()->id,
             'category_id' => $request->category_id,
             'title' => $request->title,
             'amount' => $request->amount,
             'type' => $request->type
         ]);
+
+        ActivityLogger::log(
+            $request->user()->id,
+            'created',
+            Transaction::class,
+            $transaction->id,
+            'Created Transaction',
+            [
+                'title' => $transaction->title,
+                'amount' => $transaction->amount,
+                'type' => $transaction->type,
+            ]
+        );
+
+        return response()->json($transaction, 201);
     }
 
     public function update(TransactionRequest $request, $id)
@@ -79,8 +96,32 @@ class TransactionController extends Controller
             $transaction
         );
 
+        $oldData = $transaction->only([
+            'title',
+            'amount',
+            'type',
+            'category_id'
+        ]);
+
         $transaction->update(
             $request->validated()
+        );
+
+        ActivityLogger::log(
+            $request->user()->id,
+            'updated',
+            Transaction::class,
+            $transaction->id,
+            'Updated transaction',
+            [
+                'before' => $oldData,
+                'after' => $transaction->fresh()->only([
+                    'title',
+                    'amount',
+                    'type',
+                    'category_id'
+                ]),
+            ]
         );
 
         return response()->json([
@@ -103,7 +144,23 @@ class TransactionController extends Controller
             $transaction
         );
 
+        $deletedData = $transaction->only([
+            'title',
+            'amount',
+            'type',
+            'category_id'
+        ]);
+
         $transaction->delete();
+
+        ActivityLogger::log(
+            $request->user()->id,
+            'deleted',
+            Transaction::class,
+            $transaction->id,
+            'Deleted transaction',
+            $deletedData
+        );
         
         return response()->json([
             'message' => 'Delete Success',
@@ -160,5 +217,37 @@ class TransactionController extends Controller
             200,
             $headers
         );
+    }
+
+    public function bulkStore(Request $request)
+    {
+        $data = $request->validate([
+            '*.title' => 'required|max:255',
+            '*.amount' => 'required|numeric',
+            '*.type' => 'required|in:income,expense',
+            '*.category_id' => 'required|exists:categories,id',
+        ]);
+
+        $transactions = DB::transaction(function () use ($data, $request) {
+            $createdTransactions = [];
+
+            foreach ($data as $item) {
+                $createdTransactions[] = Transaction::create([
+                    'user_id' => $request->user()->id,
+                    'title' => $item['title'],
+                    'amount' => $item['amount'],
+                    'type' => $item['type'],
+                    'category_id' => $item['category_id'],
+                ]);
+            }
+
+            return $createdTransactions;
+        });
+
+        return response()->json([
+            'message' => 'Bulk Create Success',
+            'count' => count($transactions),
+            'data' => $transactions,
+        ], 201);
     }
 }
