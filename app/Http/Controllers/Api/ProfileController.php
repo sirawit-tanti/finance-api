@@ -19,9 +19,7 @@ class ProfileController extends Controller
         }
 
         $user->update([
-            'password' => bcrypt(
-                $request->password
-            )
+            'password' => Hash::make($request->password)
         ]);
 
         return response()->json([

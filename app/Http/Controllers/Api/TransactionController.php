@@ -14,7 +14,6 @@ class TransactionController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = $request->get('per_page', 10);
         $query = Transaction::with('category')
         ->ownedBy(
             $request->user()->id
@@ -35,17 +34,32 @@ class TransactionController extends Controller
             );
         }
 
-        if ($request->filled('month')) {
-            $query->whereMonth(
-                'created_at',
-                $request->month
-            );
+        if ($request->filled('period')) {
+            if ($request->period === 'today') {
+                $query->whereDate('created_at', today());
+            }
+
+            if ($request->period === 'week') {
+                $query->whereBetween('created_at', [
+                    now()->startOfWeek(),
+                    now()->endOfWeek(),
+                ]);
+            }
+
+            if ($request->period === 'month') {
+                $query->whereMonth('created_at', now()->month)
+                    ->whereYear('created_at', now()->year);
+            }
+
+            if ($request->period === 'year') {
+                $query->whereYear('created_at', now()->year);
+            }
         }
 
         return TransactionResource::collection(
             $query
                 ->latest()
-                ->paginate($perPage)
+                ->paginate($request->integer('per_page', 10))
         );
     }
 

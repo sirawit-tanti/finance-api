@@ -17,4 +17,51 @@ class ActivityLogController extends Controller
         ->latest()
         ->paginate(10);
     }
+
+    public function export(Request $request)
+    {
+        $logs = ActivityLog::where(
+            'user_id',
+            $request->user()->id
+        )
+        ->latest()
+        ->get();
+
+        $fileName = 'activity_logs.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment: filename={$fileName}",
+        ];
+
+        $callback = function () use ($logs) {
+          $file = fopen('php://output', 'w');
+
+          fputcsv($file, [
+            'ID',
+            'Action',
+            'Model',
+            'Model ID',
+            'Description',
+            'Properties',
+            'Created At',
+          ]);
+
+          foreach ($logs as $log) {
+            fputcsv($file, [
+                $log->id,
+                $log->action,
+                $log->model,
+                $log->model_id,
+                $log->description,
+                json_encode($log->properties),
+                $log->created_at,
+            ]);
+          }
+
+          fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }
