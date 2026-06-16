@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/activity-logs/export', [ActivityLogController::class, 'export']);
     Route::get('/categories', [CategoriesController::class, 'index']);
     Route::post('/categories', [CategoriesController::class, 'store']);
+    Route::get('/categories/export', [CategoriesController::class, 'export']);
     Route::post('/change-password', [ProfileController::class, 'changePassword']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/dashboard/monthly', [DashboardController::class, 'monthly']);

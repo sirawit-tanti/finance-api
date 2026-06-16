@@ -77,14 +77,14 @@ class UserController extends Controller
 
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename({$fileName})",
+            'Content-Disposition' => "attachment; filename{$fileName}",
         ];
 
         $callback = function () use ($users) {
             $file = fopen('php://output', 'w');
 
             fputcsv($file, [
-                'ID',
+                '#',
                 'Name',
                 'Email',
                 'Role',

@@ -38,7 +38,7 @@ class ActivityLogController extends Controller
           $file = fopen('php://output', 'w');
 
           fputcsv($file, [
-            'ID',
+            '#',
             'Action',
             'Model',
             'Model ID',

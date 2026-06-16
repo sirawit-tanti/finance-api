@@ -10,7 +10,21 @@ class CategoriesController extends Controller
 {
     public function index(Request $request)
     {
-        return Category::all();
+        $query = Category::query();
+
+        if ($request->filled('search')) {
+            $query->where(
+                'name',
+                'like',
+                '%'.$request->search.'%'
+            );
+        }
+
+        return $query
+            ->latest()
+            ->paginate(
+                $request->integer('per_page', 10)
+            );
     }
 
     public function store(Request $request)
@@ -30,7 +44,7 @@ class CategoriesController extends Controller
     public function update(Request $request, Category $category)
     {
         $data = $request->validate([
-            'name' => 'required|max:255|unique:categories,name' . $category->id,
+            'name' => 'required|max:255|unique:categories,name,' . $category->id,
         ]);
 
         $category->update($data);
@@ -39,6 +53,45 @@ class CategoriesController extends Controller
             'message' => 'Category updated successfully',
             'data' => $category,
         ]);
+    }
+
+    public function export()
+    {
+        $categories = Category::latest()
+            ->get();
+
+        $fileName = 'categories.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename={$fileName}",
+        ];
+
+        $callback = function () use ($categories) {
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, [
+                '#',
+                'Name',
+                'Created At',
+            ]);
+
+            foreach ($categories as $category) {
+                fputcsv($file, [
+                    $category->id,
+                    $category->name,
+                    $category->created_at,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream(
+            $callback,
+            200,
+            $headers
+        );
     }
 
     public function destroy(Category $category)
