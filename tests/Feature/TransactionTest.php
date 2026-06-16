@@ -367,8 +367,8 @@ class TransactionTest extends TestCase
 
         $response->assertJsonFragment([
             'month' => '2026-06',
-            'income' => 30000,
-            'expense' => 120
+            'income' => '30000.00',
+            'expense' => '120.00'
         ]);
     }
 
@@ -398,7 +398,7 @@ class TransactionTest extends TestCase
 
         $response->assertJsonFragment([
             'category' => 'Food',
-            'total' => 300
+            'total' => '300.00'
         ]);
     }
 
