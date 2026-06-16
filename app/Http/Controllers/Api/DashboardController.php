@@ -63,33 +63,38 @@ class DashboardController extends Controller
 
     public function monthly(Request $request)
     {
-        $data = Transaction::ownedBy(
-            $request->user()->id
-        )
-        ->selectRaw("
-            strftime('%Y-%m', created_at) as month,
-            type,
-            SUM(amount) as total
-        ")
-        ->groupBy('month', 'type')
-        ->orderBy('month')
-        ->get();
+        $period = $request->get('period', 'month');
 
-        $result = [];
+        $query = Transaction::where('user_id', $request->user()->id);
 
-        foreach ($data as $row) {
-            if (!isset($result[$row->month])) {
-                $result[$row->month] = [
-                    'month' => $row->month,
-                    'income' => 0,
-                    'expense' => 0
-                ];
-            }
-
-            $result[$row->month][$row->type] = $row->total;
+        if ($period === 'today') {
+            $query->whereDate('created_at', today());
         }
-        
-        return array_values($result);
+
+        if ($period === 'week') {
+            $query->whereBetween('created_at', [
+                now()->startOfWeek(),
+                now()->endOfWeek(),
+            ]);
+        }
+
+        if ($period === 'month') {
+            $query->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year);
+        }
+
+        if ($period === 'year') {
+            $query->whereYear('created_at', now()->year);
+        }
+
+        return $query
+            ->selectRaw('MONTH(created_at) as month_number')
+            ->selectRaw("DATE_FORMAT(created_at, '%b') as month")
+            ->selectRaw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income")
+            ->selectRaw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense")
+            ->groupBy('month_number', 'month')
+            ->orderBy('month_number')
+            ->get();
     }
 
     public function category(Request $request) 
