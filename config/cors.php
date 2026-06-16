@@ -21,7 +21,7 @@ return [
 
     'allowed_origins' => [
         'http://localhost:5173',
-        'https://your-frontend.vercel.app',
+        'https://finance-web-steel.vercel.app/',
     ],
 
     'allowed_origins_patterns' => [],
