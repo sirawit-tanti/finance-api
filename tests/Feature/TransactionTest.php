@@ -366,7 +366,7 @@ class TransactionTest extends TestCase
         $response->assertOk();
 
         $response->assertJsonFragment([
-            'month' => '2026-06',
+            'month' => 'Jun',
             'income' => '30000.00',
             'expense' => '120.00'
         ]);
