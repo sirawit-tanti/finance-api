@@ -19,10 +19,12 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
-        'http://localhost:5173',
-        'https://finance-web-steel.vercel.app/',
-    ],
+    // 'allowed_origins' => [
+    //     'http://localhost:5173',
+    //     'https://finance-web-steel.vercel.app/',
+    // ],
+
+    'allowed_origins' => ['*'],
 
     'allowed_origins_patterns' => [],
 
