@@ -1,5 +1,9 @@
 # Personal Finance Dashboard API
 
+![Laravel](https://img.shields.io/badge/Laravel-12-red)
+![PHP](https://img.shields.io/badge/PHP-8.3-blue)
+![MySQL](https://img.shields.io/badge/MySQL-8-orange)
+
 Backend API for the Personal Finance Dashboard application, built with Laravel 12 and MySQL.
 
 ## Overview
@@ -51,6 +55,19 @@ https://finance-api-production-dc56.up.railway.app/up
 - Railway
 - GitHub Actions
 
+## Architecture
+
+Frontend (React)
+↓
+Laravel API (Sanctum)
+↓
+MySQL Database
+
+Deployment:
+
+- Frontend → Vercel
+- Backend → Railway
+
 ## API Endpoints
 
 ### Authentication
@@ -83,6 +100,12 @@ https://finance-api-production-dc56.up.railway.app/up
 - POST /api/user
 - PUT /api/user/{id}
 - DELETE /api/user/{id}
+
+## Screenshots
+
+View application screenshots in the frontend repository:
+
+https://github.com/sirawit-tanti/finance-web
 
 ## Installation
 
@@ -144,5 +167,6 @@ Production deployment is hosted on Railway.
 
 Sirawit Tantiparinyakul
 
-GitHub:
-https://github.com/sirawit-tanti
+- GitHub: https://github.com/sirawit-tanti
+- Frontend: https://finance-web-steel.vercel.app
+- Backend: https://finance-api-production-dc56.up.railway.app
