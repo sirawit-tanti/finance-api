@@ -26,7 +26,7 @@ jobs:
 
     env:
       APP_ENV: testing
-      APP_KEY: base64:/NS36e8Wq2D0VTj310AJGu/xC1WYsLz7O+xjQ0nVKfc=
+      APP_KEY: ${{ secrets.APP_KEY }}
       DB_CONNECTION: mysql
       DB_HOST: 127.0.0.1
       DB_PORT: 3306
