@@ -87,9 +87,21 @@ class DashboardController extends Controller
             $query->whereYear('created_at', now()->year);
         }
 
+        if (config('database.default') === 'sqlite') {
+
+            return $query
+                ->selectRaw("strftime('%m', created_at) as month_number")
+                ->selectRaw("strftime('%Y-%m', created_at) as month")
+                ->selectRaw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income")
+                ->selectRaw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense")
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get();
+        }
+
         return $query
             ->selectRaw('MONTH(created_at) as month_number')
-            ->selectRaw("DATE_FORMAT(created_at, '%b') as month")
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month")
             ->selectRaw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income")
             ->selectRaw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense")
             ->groupBy('month_number', 'month')
@@ -114,5 +126,19 @@ class DashboardController extends Controller
         ->groupBy('categories.name')
         ->orderByDesc('total')
         ->get();
+    }
+
+    public function overview(Request $request)
+    {
+        return response()->json([
+            'summary' => $this->index($request)->getData(true),
+            'monthly' => $this->monthly($request),
+            'category' => $this->category($request),
+            'recent_transactions' => Transaction::ownedBy($request->user()->id)
+                ->with('category')
+                ->latest()
+                ->limit(5)
+                ->get(),
+        ]);
     }
 }

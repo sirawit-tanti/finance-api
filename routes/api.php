@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/dashboard/monthly', [DashboardController::class, 'monthly']);
     Route::get('/dashboard/category', [DashboardController::class, 'category']);
+    Route::get('/dashboard/overview', [DashboardController::class, 'overview']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/transaction', [TransactionController::class, 'index']);
     Route::post('/transaction', [TransactionController::class, 'store']);
