@@ -396,10 +396,10 @@ class TransactionTest extends TestCase
 
         $response->assertOk();
 
-        $response->assertJsonFragment([
-            'category' => 'Food',
-            'total' => 300
-        ]);
+        $data = $response->json();
+
+        $this->assertEquals('Food', $data[0]['category']);
+        $this->assertEquals(300, (float) $data[0]['total']);
     }
 
     public function test_can_get_categories(): void
