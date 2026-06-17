@@ -88,20 +88,34 @@ class DashboardController extends Controller
         }
 
         if (config('database.default') === 'sqlite') {
-
             return $query
                 ->selectRaw("strftime('%m', created_at) as month_number")
-                ->selectRaw("strftime('%Y-%m', created_at) as month")
+                ->selectRaw("
+                    CASE strftime('%m', created_at)
+                        WHEN '01' THEN 'Jan'
+                        WHEN '02' THEN 'Feb'
+                        WHEN '03' THEN 'Mar'
+                        WHEN '04' THEN 'Apr'
+                        WHEN '05' THEN 'May'
+                        WHEN '06' THEN 'Jun'
+                        WHEN '07' THEN 'Jul'
+                        WHEN '08' THEN 'Aug'
+                        WHEN '09' THEN 'Sep'
+                        WHEN '10' THEN 'Oct'
+                        WHEN '11' THEN 'Nov'
+                        WHEN '12' THEN 'Dec'
+                    END as month
+                ")
                 ->selectRaw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income")
                 ->selectRaw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense")
-                ->groupBy('month')
-                ->orderBy('month')
+                ->groupBy('month_number', 'month')
+                ->orderBy('month_number')
                 ->get();
         }
 
         return $query
             ->selectRaw('MONTH(created_at) as month_number')
-            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month")
+            ->selectRaw("DATE_FORMAT(created_at, '%b') as month")
             ->selectRaw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income")
             ->selectRaw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense")
             ->groupBy('month_number', 'month')

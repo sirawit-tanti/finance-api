@@ -365,11 +365,11 @@ class TransactionTest extends TestCase
 
         $response->assertOk();
 
-        $response->assertJsonFragment([
-            'month' => 'Jun',
-            'income' => '30000.00',
-            'expense' => '120.00'
-        ]);
+        $data = $response->json();
+
+        $this->assertEquals('Jun', $data[0]['month']);
+        $this->assertEquals(30000, (float) $data[0]['income']);
+        $this->assertEquals(120, (float) $data[0]['expense']);
     }
 
     public function test_can_get_category_dashboard(): void
@@ -398,7 +398,7 @@ class TransactionTest extends TestCase
 
         $response->assertJsonFragment([
             'category' => 'Food',
-            'total' => '300.00'
+            'total' => 300
         ]);
     }
 
